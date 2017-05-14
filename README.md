@@ -19,7 +19,7 @@ Using post-save hooks in Jupyter Notebooks and post-checkout, post-merge hooks o
 
 The solution currently is targeted to Windows 10 Pro using the WSL (Windows Subsystem for Linux), Anaconda 3 and requires the Notebook Server to be started from Bash on Ubuntu on Windows. Same applies to the Git client. 
 
-Setup instructions are included in ipynb_git_config.sh, each repository can be configured using ipynb_repo_setup.sh which creates the required hooks. 
+Setup instructions are included in ipynb_git_setup.sh, each repository can be configured using ipynb_repo_config.sh which creates the required hooks. 
 
 I guess it can be easily applied on Linux-only systems as well.
 
