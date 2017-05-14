@@ -4,20 +4,59 @@ echo "Writing .jupyter_config.py"
 touch ./.jupyter_config.py
 echo 'c = get_config()
 ### If you want to auto-save .html and .py versions of your notebook:
-# modified from: https://github.com/ipython/ipython/issues/8009
+# modified from: https://gist.github.com/whatalnk/c8b3207267d798be713ea4a4664e2ccf
 import os
-from subprocess import check_call
+import io
+from nbconvert.exporters.html import HTMLExporter
+from nbconvert.exporters.rst import RSTExporter
+import nbformat
+from notebook.utils import to_api_path
 
-def post_save(model, os_path, contents_manager):
-    """post-save hook for converting notebooks to .py scripts"""
+def pre_save(model, path, contents_manager, **kwargs):
+    """On save store the notebook als .html (with output) and .rst (without output)"""
+
+    # only run on notebooks
     if model["type"] != "notebook":
-        return # only do this for notebooks
-    d, fname = os.path.split(os_path)
-    check_call(["jupyter", "nbconvert", "--to", "rst", fname], cwd=d)
-    check_call(["jupyter", "nbconvert", "--to", "html", fname], cwd=d)
+        return
+    # only run on nbformat v4
+    if model["content"]["nbformat"] != 4:
+        return
 
+    log = contents_manager.log    
 
-c.FileContentsManager.post_save_hook = post_save' > ./.jupyter_config.py
+    base, ext = os.path.splitext(path)
+
+    # Create a NotebookNode object from current model
+    nbmodel = nbformat.from_dict(model["content"])
+
+    # Create HTML before removing output
+    _html_exporter = HTMLExporter(parent=contents_manager)
+
+    html_fname = base + ".html"
+    html, html_resources = _html_exporter.from_notebook_node(nbmodel)
+    html_fname = base + html_resources.get("output_extension", ".html")
+    log.info("Saving HTML /%s", to_api_path(html_fname, contents_manager.root_dir))
+    with io.open(html_fname, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    # Remove output for rst    
+    for c in nbmodel.cells:
+        if c.cell_type != "code":
+          continue
+        c.outputs = []
+        c.execution_count = None    
+
+    # Export rst
+    _rst_exporter = RSTExporter(parent=contents_manager)
+
+    rst_fname = base + ".rst"
+    rst, resources = _rst_exporter.from_notebook_node(nbmodel)
+    rst_fname = base + resources.get("output_extension", ".rst")
+    log.info("Saving rst /%s", to_api_path(rst_fname, contents_manager.root_dir))
+    with io.open(rst_fname, "w", encoding="utf-8") as f:
+        f.write(rst)
+
+c.FileContentsManager.pre_save_hook = pre_save' > ./.jupyter_config.py
 
 # Configure .gitignore
 echo "Adding *.ipynb to .gitignore"
