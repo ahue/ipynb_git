@@ -25,6 +25,8 @@ I guess it can be easily applied on Linux-only systems as well.
 
 I resorted to WSL since I wasn't able to get rst2ipynb up and running using my Windows Anaconda installation and Cygwin.
 
+Jupyter can be started and used using `jupyter notebook --config=./.jupyter_config.py` as well from Bash on Ubuntu on Windows (WSL) as normal windows (cmd, powershell or cygwin).
+
 # Maturity
 
 Just created the first version that runs on my laptop. No intense testing happened yet. 
