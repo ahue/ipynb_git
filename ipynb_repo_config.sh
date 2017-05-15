@@ -75,7 +75,7 @@ check_run() {
 }
 
 check_run_all() {
-  echo "$changed_files" | grep "$1" | while read line ; do $(eval "echo $line | $2") ; done 
+  echo "$changed_files" | grep "$1" | while read line ; do if [ -f $line ] ; then $(eval "echo $line | $2") ; fi ; done 
 }
 
 check_run_all \\.rst$ "cut -d'\''.'\'' -f1 | awk '\''{print \"rst2ipynb\",\$0\".rst -o\",\$0\".ipynb\"}'\''"' > ./.git/hooks/post-checkout
@@ -92,7 +92,7 @@ check_run() {
 }
 
 check_run_all() {
-  echo "$changed_files" | grep "$1" | while read line ; do $(eval "echo $line | $2") ; done 
+  echo "$changed_files" | grep "$1" | while read line ; do if [ -f $line ] ; then $(eval "echo $line | $2") ; fi ; done 
 }
 
 check_run_all \\.rst$ "cut -d'\''.'\'' -f1 | awk '\''{print \"rst2ipynb\",\$0\".rst -o\",\$0\".ipynb\"}'\''"' > ./.git/hooks/post-merge
